@@ -88,18 +88,20 @@ async function openPlaywrightDocs(options = {}) {
     }
     console.log(`✓ Assertion passed: Found ${links} links on the page (expected at least 5)`);
     
-    // Assertion: Verify we're on the correct domain
+    // Get current URL for security and domain validation
     const currentUrl = page.url();
-    if (!currentUrl.includes('playwright.dev')) {
-      throw new Error(`Assertion failed: Expected URL to contain "playwright.dev", but got "${currentUrl}"`);
-    }
-    console.log(`✓ Assertion passed: Current URL is on correct domain (${currentUrl})`);
     
     // Assertion: Verify the page is using HTTPS (security check)
     if (!currentUrl.startsWith('https://')) {
       throw new Error(`Assertion failed: Expected URL to use HTTPS for secure connection, but got "${currentUrl}"`);
     }
     console.log('✓ Assertion passed: Page is using HTTPS for secure connection');
+    
+    // Assertion: Verify we're on the correct domain
+    if (!currentUrl.includes('playwright.dev')) {
+      throw new Error(`Assertion failed: Expected URL to contain "playwright.dev", but got "${currentUrl}"`);
+    }
+    console.log(`✓ Assertion passed: Current URL is on correct domain (${currentUrl})`);
     
     console.log('\n✓ Playwright demo completed successfully!');
     console.log('✓ All assertions passed!');

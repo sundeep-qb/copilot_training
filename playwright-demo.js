@@ -95,6 +95,12 @@ async function openPlaywrightDocs(options = {}) {
     }
     console.log(`✓ Assertion passed: Current URL is on correct domain (${currentUrl})`);
     
+    // Assertion: Verify the page is using HTTPS (security check)
+    if (!currentUrl.startsWith('https://')) {
+      throw new Error(`Assertion failed: Expected URL to use HTTPS for secure connection, but got "${currentUrl}"`);
+    }
+    console.log('✓ Assertion passed: Page is using HTTPS for secure connection');
+    
     console.log('\n✓ Playwright demo completed successfully!');
     console.log('✓ All assertions passed!');
     return { success: true, pageTitle: title, headingCount: headings.length };

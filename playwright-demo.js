@@ -96,8 +96,13 @@ async function openPlaywrightDocs(options = {}) {
     console.log(`✓ Assertion passed: Current URL is on correct domain (${currentUrl})`);
     
     // Assertion: Verify navigation menu is visible
-    const navElement = await page.locator('nav, header').first();
-    const isNavVisible = await navElement.isVisible().catch(() => false);
+    const navLocator = page.locator('nav, header');
+    const navCount = await navLocator.count();
+    if (navCount === 0) {
+      throw new Error('Assertion failed: Expected navigation menu element (nav or header) to exist on the homepage');
+    }
+    const navElement = navLocator.first();
+    const isNavVisible = await navElement.isVisible({ timeout: 5000 });
     if (!isNavVisible) {
       throw new Error('Assertion failed: Expected navigation menu to be visible on the homepage');
     }
@@ -105,7 +110,7 @@ async function openPlaywrightDocs(options = {}) {
     
     console.log('\n✓ Playwright demo completed successfully!');
     console.log('✓ All assertions passed!');
-    return { success: true, pageTitle: title, headingCount: headings.length };
+    return { success: true, pageTitle: title, headingCount: headings.length, hasNavigation: true };
     
   } catch (error) {
     console.error('❌ Error during demo:', error.message);

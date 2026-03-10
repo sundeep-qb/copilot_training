@@ -95,6 +95,13 @@ async function openPlaywrightDocs(options = {}) {
     }
     console.log(`✓ Assertion passed: Current URL is on correct domain (${currentUrl})`);
     
+    // Assertion: Verify search functionality is available
+    const searchInputs = await page.locator('input[type="search"], input[placeholder*="Search" i], button[aria-label*="search" i]').count();
+    if (searchInputs === 0) {
+      throw new Error('Assertion failed: Expected search functionality to be present on the documentation page');
+    }
+    console.log(`✓ Assertion passed: Search functionality is available (${searchInputs} search element(s) found)`);
+    
     console.log('\n✓ Playwright demo completed successfully!');
     console.log('✓ All assertions passed!');
     return { success: true, pageTitle: title, headingCount: headings.length };

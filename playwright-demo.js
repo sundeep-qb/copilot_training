@@ -94,6 +94,14 @@ async function openPlaywrightDocs(options = {}) {
       throw new Error(`Assertion failed: Expected URL to contain "playwright.dev", but got "${currentUrl}"`);
     }
     console.log(`✓ Assertion passed: Current URL is on correct domain (${currentUrl})`);
+
+    // Assertion: Verify the "Get started" CTA button is visible on the homepage
+    const getStartedLink = page.locator('a', { hasText: /get started/i }).first();
+    const isGetStartedVisible = await getStartedLink.isVisible();
+    if (!isGetStartedVisible) {
+      throw new Error('Assertion failed: Expected "Get started" link to be visible on the homepage');
+    }
+    console.log('✓ Assertion passed: "Get started" link is visible on the homepage');
     
     console.log('\n✓ Playwright demo completed successfully!');
     console.log('✓ All assertions passed!');

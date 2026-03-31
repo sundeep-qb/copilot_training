@@ -95,6 +95,13 @@ async function openPlaywrightDocs(options = {}) {
     }
     console.log(`✓ Assertion passed: Current URL is on correct domain (${currentUrl})`);
     
+    // Assertion: Verify navigation menu is present
+    const navElements = await page.locator('nav').count();
+    if (navElements === 0) {
+      throw new Error('Assertion failed: Expected at least one navigation menu on the homepage');
+    }
+    console.log(`✓ Assertion passed: Navigation menu found on the homepage (${navElements} nav element(s))`);
+    
     console.log('\n✓ Playwright demo completed successfully!');
     console.log('✓ All assertions passed!');
     return { success: true, pageTitle: title, headingCount: headings.length };

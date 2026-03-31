@@ -95,12 +95,12 @@ async function openPlaywrightDocs(options = {}) {
     }
     console.log(`✓ Assertion passed: Current URL is on correct domain (${currentUrl})`);
 
-    // Assertion: Verify the "Get started" CTA button is visible on the homepage
+    // Assertion: Verify the "Get started" CTA button is visible on the homepage.
+    // Uses waitFor({ state: 'visible' }) instead of isVisible() to leverage
+    // Playwright's built-in retry mechanism, avoiding false negatives when the
+    // hero section hasn't fully painted yet.
     const getStartedLink = page.locator('a', { hasText: /get started/i }).first();
-    const isGetStartedVisible = await getStartedLink.isVisible();
-    if (!isGetStartedVisible) {
-      throw new Error('Assertion failed: Expected "Get started" link to be visible on the homepage');
-    }
+    await getStartedLink.waitFor({ state: 'visible', timeout: config.timeout });
     console.log('✓ Assertion passed: "Get started" link is visible on the homepage');
     
     console.log('\n✓ Playwright demo completed successfully!');

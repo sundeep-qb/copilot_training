@@ -61,10 +61,6 @@ async function openPlaywrightDocs(options = {}) {
     await page.screenshot({ path: config.screenshotPath });
     console.log(`✓ Screenshot saved as ${config.screenshotPath}`);
     
-    // Wait for main content to be visible
-    console.log('Waiting for main content...');
-    await page.waitForLoadState('domcontentloaded');
-    
     // Get page content statistics
     const headings = await page.locator('h1').allTextContents();
     const links = await page.locator('a').count();
@@ -95,21 +91,25 @@ async function openPlaywrightDocs(options = {}) {
     }
     console.log(`✓ Assertion passed: Current URL is on correct domain (${currentUrl})`);
 
-    // Assertion: Verify the "Get started" call-to-action link is present on the homepage
-    const getStartedLink = page.getByRole('link', { name: /get started/i });
-    const getStartedCount = await getStartedLink.count();
-    if (getStartedCount === 0) {
-      throw new Error('Assertion failed: Expected a "Get started" link to be present on the homepage');
+    // Assertion: Verify the "Get started" call-to-action link is visible on the homepage
+    const getStartedLink = page.getByRole('link', { name: /get started/i }).first();
+    const isGetStartedVisible = await getStartedLink.isVisible();
+    if (!isGetStartedVisible) {
+      throw new Error('Assertion failed: Expected a "Get started" link to be visible on the homepage');
     }
-    console.log('✓ Assertion passed: "Get started" link is present on the homepage');
+    console.log('✓ Assertion passed: "Get started" link is visible on the homepage');
 
     console.log('\n✓ Playwright demo completed successfully!');
     console.log('✓ All assertions passed!');
-    return { success: true, pageTitle: title, headingCount: headings.length };
+    return { success: true, pageTitle: title, headingCount: headings.length, getStartedFound: true };
     
   } catch (error) {
     console.error('❌ Error during demo:', error.message);
-    process.exitCode = 1;
+    // Only set process exit code when running as a standalone script,
+    // to avoid unexpected side effects when used as a module.
+    if (require.main === module) {
+      process.exitCode = 1;
+    }
     return { success: false, error: error.message };
   } finally {
     // Close the browser safely

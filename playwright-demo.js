@@ -15,9 +15,15 @@ async function openPlaywrightDocs(options = {}) {
   let browser = null;
   
   try {
-    // Validate URL
-    if (!config.url.startsWith('http')) {
-      throw new Error('Invalid URL: URL must start with http or https');
+    // Validate URL using URL constructor for robust parsing
+    let parsedUrl;
+    try {
+      parsedUrl = new URL(config.url);
+    } catch {
+      throw new Error(`Invalid URL: "${config.url}" is not a valid URL`);
+    }
+    if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+      throw new Error('Invalid URL: URL must use http or https protocol');
     }
 
     // Launch browser in headless mode
@@ -57,14 +63,6 @@ async function openPlaywrightDocs(options = {}) {
     }
     console.log('✓ Assertion passed: Page title contains "Playwright"');
     
-    // Take a screenshot for demo
-    await page.screenshot({ path: config.screenshotPath });
-    console.log(`✓ Screenshot saved as ${config.screenshotPath}`);
-    
-    // Wait for main content to be visible
-    console.log('Waiting for main content...');
-    await page.waitForLoadState('domcontentloaded');
-    
     // Get page content statistics
     const headings = await page.locator('h1').allTextContents();
     const links = await page.locator('a').count();
@@ -103,13 +101,16 @@ async function openPlaywrightDocs(options = {}) {
     }
     console.log('✓ Assertion passed: "Get started" link is present on the homepage');
     
+    // Take a screenshot after all assertions pass, ensuring page is fully stable
+    await page.screenshot({ path: config.screenshotPath });
+    console.log(`✓ Screenshot saved as ${config.screenshotPath}`);
+
     console.log('\n✓ Playwright demo completed successfully!');
     console.log('✓ All assertions passed!');
     return { success: true, pageTitle: title, headingCount: headings.length };
     
   } catch (error) {
     console.error('❌ Error during demo:', error.message);
-    process.exitCode = 1;
     return { success: false, error: error.message };
   } finally {
     // Close the browser safely
@@ -125,7 +126,9 @@ module.exports = { openPlaywrightDocs };
 
 // Run the demo if executed directly
 if (require.main === module) {
-  openPlaywrightDocs().catch(error => {
+  openPlaywrightDocs().then(result => {
+    if (!result.success) process.exit(1);
+  }).catch(error => {
     console.error('Fatal error:', error);
     process.exit(1);
   });
